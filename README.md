@@ -1,11 +1,11 @@
-# briq
+# briq:
 
-#create a virtual env
+#create a virtual env:
 python -m venv venv
 ./venv/bin/activate
 
-#Install python libraries
+#Install python libraries:
 pip install -r requirements
 
-#cd to brig directory and run the app
+#cd to brig directory and run the app:
 python manage.py runserver
