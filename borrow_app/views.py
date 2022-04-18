@@ -14,10 +14,11 @@ class Login(View):
         """
         status = 200
         try:
-            payload = json.loads(request.body)
-        except:
+            payload = json.loads(request.body.decode('utf-8'))
+        except Exception as e:
             data = {"message": "Input is not json"}
             status = 400
+            print(f"Error login:{e}")
             return JsonResponse(data, status=status)
         if 'username' not in payload or 'password' not in payload:
             data = {"message": "username or password not present in body"}
@@ -46,19 +47,20 @@ class Transaction(View):
         else:
             data = {"message": "User_id not present in query params"}
             status = 400
-        return JsonResponse(data, status=status)
+        return JsonResponse(data, status=status, safe=False)
 
     def post(self, request) -> JsonResponse:
         """
         Add a transaction
         """
         try:
-            payload = json.loads(request.body)
-        except:
+            payload = json.loads(request.body.decode('utf-8'))
+        except Exception as e:
             data = {"message": "Input is not json"}
             status = 400
             return JsonResponse(data, status=status)
         try:
+            print(payload)
             t = models.Transactions.objects.create(**payload)
             t.save()
             data = {"message": "Success"}
@@ -67,6 +69,7 @@ class Transaction(View):
         except Exception as e:
             data = {"message": "Failed"}
             status = 400
+            print(f"Post transaction failed {e}")
             return JsonResponse(data, status=status)
 
 
@@ -76,7 +79,7 @@ class MarkPaid(View):
     """
     def post(self, request) -> JsonResponse:
         try:
-            payload = json.loads(request.body)
+            payload = json.loads(request.body.decode('utf-8'))
         except:
             data = {"message": "Input is not json"}
             status = 400
@@ -122,4 +125,4 @@ class CreditScore(View):
         else:
             data = {"message": "User_id not present in query params"}
             status = 400
-        return JsonResponse(data, status=status)
+        return JsonResponse(data, status=status, safe=False)

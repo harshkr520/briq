@@ -17,8 +17,9 @@ class LoginTestCase(TestCase):
 
     def test_user_login(self):
         c = Client()
-        response = c.post('/login/', {'username': 'user1', 'password': 'pass1'})
-        self.assertEqual(json.loads(response.body), {"message": True})
+        data = json.dumps({'username': 'user1', 'password': 'pass1'})
+        response = c.post('/login/', data, content_type='application/json')
+        self.assertEqual(response.json(), {"message": True})
 
     def tearDown(self):
         u = models.Users.objects.get(pk=self.user_id)
@@ -39,28 +40,30 @@ class TransactionTestCase(TestCase):
         u = models.Users.objects.create(**user_record)
         u.save()
         self.user_id2 = u.id
+        self.transaction_id = ''.join([random.choice(string.ascii_lowercase) for _ in range(8)])
 
     def test_put_transaction(self):
         c = Client()
-        self.transaction_id = ''.join([random.choice(string.ascii_lowercase) for _ in range(8)])
-        data = {"id": self.transaction_id,
+        data = {"transaction_id": self.transaction_id,
                 "transaction_type": "borrow",
                 "transaction_date": "2022-04-17",
                 "transaction_status": "unpaid",
-                "transaction_from": self.user_id1,
-                "transaction_with": self.user_id2,
+                "transaction_from_id": self.user_id1,
+                "transaction_with_id": self.user_id2,
                 "transaction_amount": 100,
                 }
-        response = c.post('/transaction/', data)
-        self.assertEqual(json.loads(response.body), {"message": "Success"})
+        data = json.dumps(data)
+        response = c.post('/transaction/', data, content_type='application/json')
+        self.assertEqual(response.json(), {"message": "Success"})
 
     def test_mark_paid(self):
         c = Client()
-        response = c.post('/transaction/', {"transaction_id": self.transaction_id})
-        self.assertEqual(json.loads(response.body), {"message": "Transaction status updated"})
+        data = json.dumps({"transaction_id": self.transaction_id})
+        response = c.post('/mark_paid/', data, content_type='application/json')
+        self.assertEqual(response.json(), {"message": "Transaction status updated"})
 
-    def tearDown(self):
-        u = models.Users.objects.get(pk=self.user_id1)
-        u.delete()
-        u = models.Users.objects.get(pk=self.user_id2)
-        u.delete()
+    # def tearDown(self):
+    #     u = models.Users.objects.get(pk=self.user_id1)
+    #     u.delete()
+    #     u = models.Users.objects.get(pk=self.user_id2)
+    #     u.delete()
